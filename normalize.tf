@@ -18,8 +18,8 @@ locals {
     type            = rule.type
     protocol        = rule.protocol
     rule_action     = rule.action
-    cidr_block      = rule.cidr_block
-    ipv6_cidr_block = rule.ipv6_cidr_block
+    cidr_block      = rule.ip_version == "v4" ? rule.cidr_block : null
+    ipv6_cidr_block = rule.ip_version == "v6" ? rule.cidr_block : null
     from_port       = rule.from_port
     to_port         = rule.to_port
     # icmp_type      = rule.icmp_type
@@ -35,8 +35,8 @@ locals {
     type            = rule.type
     protocol        = rule.protocol
     rule_action     = rule.action
-    cidr_block      = rule.cidr_block
-    ipv6_cidr_block = rule.ipv6_cidr_block
+    cidr_block      = rule.ip_version == "v4" ? rule.cidr_block : null
+    ipv6_cidr_block = rule.ip_version == "v6" ? rule.cidr_block : null
     from_port       = rule.from_port
     to_port         = rule.to_port
     # icmp_type      = rule.icmp_type
