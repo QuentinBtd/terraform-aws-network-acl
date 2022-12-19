@@ -4,9 +4,10 @@ locals {
 
   allow_all_egress = local.enabled && var.allow_all_egress
 
-  allow_all_egress_rule_number = var.allow_all_egress_rule_number
+  allow_all_egress_ipv4_rule_number = var.allow_all_egress_ipv4_rule_number
+  allow_all_egress_ipv6_rule_number = var.allow_all_egress_ipv6_rule_number
 
-  create_network_acl    = local.enabled && length(var.target_network_acl_id) == 0
+  create_network_acl         = local.enabled && length(var.target_network_acl_id) == 0
   nacl_create_before_destroy = var.create_before_destroy
 
   created_network_acl = local.create_network_acl ? (
@@ -64,38 +65,38 @@ resource "aws_network_acl" "default" {
   ## Everything from here to the end of this resource should be identical
   ## (copy and paste) in aws_network_acl.default and aws_network_acl.cbd
 
-  vpc_id      = var.vpc_id
-  subnet_ids  = var.subnet_ids
-  tags        = merge(module.this.tags, try(length(var.network_acl_name[0]), 0) > 0 ? { Name = var.network_acl_name[0] } : {})
+  vpc_id     = var.vpc_id
+  subnet_ids = var.subnet_ids
+  tags       = merge(module.this.tags, try(length(var.network_acl_name[0]), 0) > 0 ? { Name = var.network_acl_name[0] } : {})
 
 
   dynamic "ingress" {
     for_each = local.all_ingress_rules
     content {
-      egress         = false
-      protocol       = ingress.value.protocol
-      rule_action    = ingress.value.action
-      cidr_block     = ingress.value.cidr_block
+      rule_no         = ingress.value.number
+      protocol        = ingress.value.protocol
+      action          = ingress.value.action
+      cidr_block      = ingress.value.cidr_block
       ipv6_cidr_block = ingress.value.ipv6_cidr_block
-      from_port      = ingress.value.from_port
-      to_port        = ingress.value.to_port
-      icmp_type      = ingress.value.icmp_type
-      icmp_code      = ingress.value.icmp_code
+      from_port       = ingress.value.from_port
+      to_port         = ingress.value.to_port
+      # icmp_type       = ingress.value.icmp_type
+      # icmp_code       = ingress.value.icmp_code
     }
   }
 
   dynamic "egress" {
     for_each = local.all_egress_rules
     content {
-      egress         = true
-      protocol       = ingress.value.protocol
-      rule_action    = ingress.value.action
-      cidr_block     = ingress.value.cidr_block
-      ipv6_cidr_block = ingress.value.ipv6_cidr_block
-      from_port      = ingress.value.from_port
-      to_port        = ingress.value.to_port
-      icmp_type      = ingress.value.icmp_type
-      icmp_code      = ingress.value.icmp_code
+      rule_no         = egress.value.number
+      protocol        = egress.value.protocol
+      action          = egress.value.action
+      cidr_block      = egress.value.cidr_block
+      ipv6_cidr_block = egress.value.ipv6_cidr_block
+      from_port       = egress.value.from_port
+      to_port         = egress.value.to_port
+      # icmp_type       = egress.value.icmp_type
+      # icmp_code       = egress.value.icmp_code
     }
   }
 
@@ -120,7 +121,7 @@ resource "aws_network_acl" "cbd" {
   # Because we have 2 almost identical alternatives, use x == false and x == true rather than x and !x
   count = local.create_network_acl && local.nacl_create_before_destroy == true ? 1 : 0
 
-  name_prefix = local.nacl_name_prefix
+  # name_prefix = local.nacl_name_prefix
   lifecycle {
     create_before_destroy = true
   }
@@ -129,37 +130,37 @@ resource "aws_network_acl" "cbd" {
   ## Everything from here to the end of this resource should be identical
   ## (copy and paste) in aws_network_acl.default and aws_network_acl.cbd
 
-  vpc_id      = var.vpc_id
-  subnet_ids  = var.subnet_ids
-  tags        = merge(module.this.tags, try(length(var.network_acl_name[0]), 0) > 0 ? { Name = var.network_acl_name[0] } : {})
+  vpc_id     = var.vpc_id
+  subnet_ids = var.subnet_ids
+  tags       = merge(module.this.tags, try(length(var.network_acl_name[0]), 0) > 0 ? { Name = var.network_acl_name[0] } : {})
 
   dynamic "ingress" {
-      for_each = local.all_ingress_rules
-      content {
-        egress         = false
-        protocol       = ingress.value.protocol
-        rule_action    = ingress.value.action
-        cidr_block     = ingress.value.cidr_block
-        ipv6_cidr_block = ingress.value.ipv6_cidr_block
-        from_port      = ingress.value.from_port
-        to_port        = ingress.value.to_port
-        icmp_type      = ingress.value.icmp_type
-        icmp_code      = ingress.value.icmp_code
-      }
+    for_each = local.all_ingress_rules
+    content {
+      rule_no         = ingress.value.number
+      protocol        = ingress.value.protocol
+      action          = ingress.value.action
+      cidr_block      = ingress.value.cidr_block
+      ipv6_cidr_block = ingress.value.ipv6_cidr_block
+      from_port       = ingress.value.from_port
+      to_port         = ingress.value.to_port
+      # icmp_type      = ingress.value.icmp_type
+      # icmp_code      = ingress.value.icmp_code
+    }
   }
 
   dynamic "egress" {
     for_each = local.all_egress_rules
     content {
-      egress         = true
-      protocol       = ingress.value.protocol
-      rule_action    = ingress.value.action
-      cidr_block     = ingress.value.cidr_block
-      ipv6_cidr_block = ingress.value.ipv6_cidr_block
-      from_port      = ingress.value.from_port
-      to_port        = ingress.value.to_port
-      icmp_type      = ingress.value.icmp_type
-      icmp_code      = ingress.value.icmp_code
+      rule_no         = egress.value.number
+      protocol        = egress.value.protocol
+      action          = egress.value.action
+      cidr_block      = egress.value.cidr_block
+      ipv6_cidr_block = egress.value.ipv6_cidr_block
+      from_port       = egress.value.from_port
+      to_port         = egress.value.to_port
+      # icmp_type      = egress.value.icmp_type
+      # icmp_code      = egress.value.icmp_code
     }
   }
 
@@ -177,27 +178,26 @@ resource "aws_network_acl" "cbd" {
 resource "aws_network_acl_rule" "keyed" {
   for_each = local.rule_create_before_destroy ? local.keyed_resource_rules : {}
 
-  lifecycle {
-    create_before_destroy = true
-  }
+  # lifecycle {
+  #   create_before_destroy = true
+  # }
 
   ########################################################################
   ## Everything from here to the end of this resource should be identical
   ## (copy and paste) in aws_network_acl_rule.keyed and aws_network_acl.dbc
 
+  network_acl_id = local.network_acl_id
 
-  network_acl_id = local.cbd_network_acl_id
-
-  type        = each.value.type
-  from_port   = each.value.from_port
-  to_port     = each.value.to_port
-  protocol    = each.value.protocol
-
-  cidr_blocks              = length(each.value.cidr_blocks) == 0 ? null : each.value.cidr_blocks
-  ipv6_cidr_blocks         = length(each.value.ipv6_cidr_blocks) == 0 ? null : each.value.ipv6_cidr_blocks
-  prefix_list_ids          = length(each.value.prefix_list_ids) == 0 ? [] : each.value.prefix_list_ids
-  self                     = each.value.self
-  source_network_acl_id = each.value.source_network_acl_id
+  rule_number     = each.value.rule_number
+  egress          = each.value.type != "egress" ? "false" : true
+  protocol        = each.value.protocol
+  rule_action     = each.value.rule_action
+  cidr_block      = each.value.cidr_block
+  ipv6_cidr_block = each.value.ipv6_cidr_block
+  from_port       = each.value.from_port
+  to_port         = each.value.to_port
+  # icmp_type      = each.value.icmp_type
+  # icmp_code      = each.value.icmp_code
 
   ##
   ## end of duplicate block
@@ -208,10 +208,10 @@ resource "aws_network_acl_rule" "keyed" {
 resource "aws_network_acl_rule" "dbc" {
   for_each = local.rule_create_before_destroy ? {} : local.keyed_resource_rules
 
-  lifecycle {
-    # This has no actual effect, it is just here for emphasis
-    create_before_destroy = false
-  }
+  # lifecycle {
+  #   # This has no actual effect, it is just here for emphasis
+  #   create_before_destroy = false
+  # }
   ########################################################################
   ## Everything from here to the end of this resource should be identical
   ## (copy and paste) in aws_network_acl.default and aws_network_acl.cbd
@@ -219,16 +219,16 @@ resource "aws_network_acl_rule" "dbc" {
 
   network_acl_id = local.network_acl_id
 
-  type        = each.value.type
-  from_port   = each.value.from_port
-  to_port     = each.value.to_port
-  protocol    = each.value.protocol
-
-  cidr_blocks              = length(each.value.cidr_blocks) == 0 ? null : each.value.cidr_blocks
-  ipv6_cidr_blocks         = length(each.value.ipv6_cidr_blocks) == 0 ? null : each.value.ipv6_cidr_blocks
-  prefix_list_ids          = length(each.value.prefix_list_ids) == 0 ? [] : each.value.prefix_list_ids
-  self                     = each.value.self
-  source_network_acl_id = each.value.source_network_acl_id
+  rule_number     = each.value.number
+  egress          = each.value.type != "egress" ? "false" : true
+  protocol        = each.value.protocol
+  rule_action     = each.value.action
+  cidr_block      = each.value.cidr_block
+  ipv6_cidr_block = each.value.ipv6_cidr_block
+  from_port       = each.value.from_port
+  to_port         = each.value.to_port
+  # icmp_type      = each.value.icmp_type
+  # icmp_code      = each.value.icmp_code
 
   ##
   ## end of duplicate block
@@ -254,7 +254,7 @@ resource "null_resource" "sync_rules_and_nacl_lifecycles" {
 
   depends_on = [aws_network_acl_rule.keyed]
 
-  lifecycle {
-    create_before_destroy = true
-  }
+  # lifecycle {
+  #   create_before_destroy = true
+  # }
 }

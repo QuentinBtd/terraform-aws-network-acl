@@ -155,9 +155,9 @@ variable "vpc_id" {
 }
 
 variable "subnet_ids" {
-  type = list(string)
+  type        = list(string)
   description = "IDs of Security Groups with witch the Network ACL have to be associate."
-  default = []
+  default     = []
 }
 
 variable "inline_rules_enabled" {
@@ -170,8 +170,14 @@ variable "inline_rules_enabled" {
   default     = false
 }
 
-variable "allow_all_egress_rule_number" {
-  type = number
+variable "allow_all_egress_ipv4_rule_number" {
+  type        = number
   description = "(optional) Rule number for `allow_all_egress` rule"
-  default = 100
+  default     = 100
+}
+
+variable "allow_all_egress_ipv6_rule_number" {
+  type        = number
+  description = "(optional) Rule number for `allow_all_egress` rule"
+  default     = 101
 }
